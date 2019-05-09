@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+from __future__ import print_function
+#import argparse
+import os
+import sys
+import time
+import rov
+
+commands = ["start_rov", "write_input",
+        "write_parameter", "write_execution",
+        "write_environment", "write_output"]
+
+
+def set_env(key, val):
+    os.environ[str(key)] = str(val)
+
+def get_env(key):
+    return os.environ.get(str(key))
+
+## Thanks https://stackoverflow.com/questions/12654772/create-empty-file-using-python/12654798
+def touch_file(path):
+    with open(path, 'a'):
+        os.utime(path, None)
+
+def check_file_exists(path):
+    return os.path.isfile(str(path))
+
+
+def report(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
+def file_to_id(fi):
+    return fi.split("/")[-1]
+
+def usage():
+
+    if len(sys.argv) < 2 or sys.argv[1] not in commands:
+        print("ROVER: a command line interface for writing basic ROV files")
+        print("Usage:")
+        print("rover <cmd> <args>")
+        print("Commands:")
+        print("\n".join(["\t" + i for i in commands]))
+
+if __name__ == "__main__":
+
+    if len(sys.argv) < 2:
+        usage()
+        exit(0)
+    
+    if sys.argv[1] == "start_rov":
+        set_env("ROV_FILE", sys.argv[2])
+        touch_file(sys.argv[2])
+        pass
+    elif sys.argv[1] == "write_input":
+        fi = None
+        if len(sys.argv) > 2 and sys.argv[2].endswith(".rov"):
+            fi = sys.argv[2]
+        else:
+            fi = get_env("ROV_FILE")
+        
+        if fi is None:
+            raise Exception("ERROR: ROV file does not exist. Cannot write.")
+        
+        pass
+    elif sys.argv[1] == "write_parameter":
+        pass
+    elif sys.argv[1] == "write_execution":
+        pass
+    elif sys.argv[1] == "write_environment":
+        pass
+    elif sys.argv[1] == "write_output":
+        pass
