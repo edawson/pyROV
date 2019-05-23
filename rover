@@ -5,6 +5,7 @@ import os
 import sys
 import time
 import rov
+from unfile import unfile
 
 commands = ["start_rov", "write_input",
         "write_parameter", "write_execution",
@@ -41,6 +42,15 @@ def usage():
         print("Commands:")
         print("\n".join(["\t" + i for i in commands]))
 
+def main_start_rov(args):
+    if len(sys.argv < 3):
+        print("rover start_rov: start a ROV file.")
+        print("REQUIRES A FILENAME.")
+        print("Usage:")
+        print("rover start_rov <filename>")
+    set_env("ROV_FILE", sys.argv[2])
+    touch_file(sys.argv[2])
+
 if __name__ == "__main__":
 
     if len(sys.argv) < 2:
@@ -60,6 +70,8 @@ if __name__ == "__main__":
         
         if fi is None:
             raise Exception("ERROR: ROV file does not exist. Cannot write.")
+
+        ## Now that we have a ROV file, let's read our input and write to it.
         
         pass
     elif sys.argv[1] == "write_parameter":

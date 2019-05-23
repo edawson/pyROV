@@ -1,6 +1,7 @@
 import hashlib
 import time
-from filehandler import unfile
+import socket
+from unfile import unfile
 
 """
  A ROV objects defines a unit of computation which is composed of the 5 modular
@@ -23,6 +24,12 @@ from filehandler import unfile
 def get_time():
     return time.time()
 
+def get_hostname():
+    return socket.gethostname()
+
+def basename(s, ext=""):
+    return s.split("/")[-1].strip(ext)
+
 class INPUT:
     def __init__(self):
         self.sig = "I"
@@ -35,8 +42,35 @@ class INPUT:
     def get_digest(self): 
         return self.unfile.digest()
 
+    def digest_to_tag(self):
+        return ":".join(["DIGEST", self.digest.algo, self.digest.digest])
+
+    def system_to_tag(self):
+        if self.system is not None:
+            return ":".join(["SYS", "Z", self.system])
+        else:
+            raise Exception("System variable was not set for file " + self.location)
+
+    def fill_from_local_file(self, filepath):
+        uf = Unfile()
+        uf.load_local(filepath)
+        self.unfile = uf
+        self.location = self.unfile.local_path
+        self.system = get_hostname()
+        self.digest = self.unfile.get_digest("md5")
+        self.id = basename(self.unfile.chop_prefix(self.unfile.unpath))
+        self.system = get_hostname()
+
+
     def to_rov_line(self):
-        s = "\t".join([self.sig, self.id, self.unfile, self.get_digest()])
+        l = []
+        l.append(self.sig)
+        l.append(self.id)
+        l.append(self.unfile.unpath)
+        l.append(self.digest_to_tag())
+        if self.system is not None:
+            l.append(system_to_tag())
+        s = "\t".join(l)
         return s
 
 class PARAMETER:
